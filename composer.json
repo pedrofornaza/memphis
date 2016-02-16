@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-0": {
+            "Memphis": "src/"
+        },
+        "psr-4": {
+            "Doubles\\": "tests/Doubles/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.2"
+    }
+}
