@@ -124,4 +124,58 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(IteratorWrapper::class, $instance);
         $this->assertInstanceOf(ArrayIterator::class, $instance->getIterator());
     }
+
+    public function test_container_creates_instance_with_params()
+    {
+        $container = new Container;
+
+        $iterator = $container->get(ArrayIterator::class, [['first', 'second']]);
+
+        $this->assertCount(2, $iterator);
+        $this->assertInstanceOf(ArrayIterator::class, $iterator);
+
+        $iterator->rewind();
+        $this->assertEquals('first', $iterator->current());
+
+        $iterator->next();
+        $this->assertEquals('second', $iterator->current());
+    }
+
+    public function test_container_pass_params_to_callback()
+    {
+        $container = new Container;
+
+        $container->bind(Iterator::class, function($params) {
+            return new ArrayIterator($params);
+        });
+
+        $iterator = $container->get(Iterator::class, [['first', 'second']]);
+
+        $this->assertCount(2, $iterator);
+        $this->assertInstanceOf(ArrayIterator::class, $iterator);
+
+        $iterator->rewind();
+        $this->assertEquals('first', $iterator->current());
+
+        $iterator->next();
+        $this->assertEquals('second', $iterator->current());
+    }
+
+    public function test_container_calls_bind_with_params()
+    {
+        $container = new Container;
+
+        $container->bind(Iterator::class, ArrayIterator::class);
+
+        $iterator = $container->get(Iterator::class, [['first', 'second']]);
+
+        $this->assertCount(2, $iterator);
+        $this->assertInstanceOf(ArrayIterator::class, $iterator);
+
+        $iterator->rewind();
+        $this->assertEquals('first', $iterator->current());
+
+        $iterator->next();
+        $this->assertEquals('second', $iterator->current());
+    }
 }

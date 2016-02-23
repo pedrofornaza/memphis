@@ -22,13 +22,13 @@ class Container
         $this->binds[$interface] = $concrete;
     }
 
-    public function get($className)
+    public function get($className, array $params = array())
     {
         if ( ! $this->hasBind($className)) {
-            return $this->resolveClass($className);
+            return $this->resolveClass($className, $params);
         }
 
-        return $this->resolveBind($this->binds[$className]);
+        return $this->resolveBind($this->binds[$className], $params);
     }
 
     protected function hasBind($bind)
@@ -36,13 +36,13 @@ class Container
         return isset($this->binds[$bind]);
     }
 
-    protected function resolveClass($class)
+    protected function resolveClass($class, $params)
     {
         if ( ! $this->isClass($class)) {
             throw new ClassNotExistsException("Class '{$class}' does not exists.");
         }
 
-        return $this->constructClass($class);
+        return $this->constructClass($class, $params);
     }
 
     protected function isClass($bind)
@@ -50,11 +50,13 @@ class Container
         return is_string($bind) && class_exists($bind);
     }
 
-    protected function constructClass($class)
+    protected function constructClass($class, $params)
     {
         $ref = new ReflectionClass($class);
-        if ($ref->isInternal()) {
-            return $ref->newInstance();
+        if ($ref->isInternal() ||
+          ! empty($params)
+        ) {
+            return $ref->newInstanceArgs($params);
         }
 
         $constructor = $ref->getConstructor();
@@ -78,13 +80,13 @@ class Container
         return $this->get($parameterClass->getName());
     }
 
-    protected function resolveBind($bind)
+    protected function resolveBind($bind, $params)
     {
         if ($this->isClass($bind)) {
-            return $this->resolveClass($bind);
+            return $this->resolveClass($bind, $params);
 
         } elseif (is_callable($bind)) {
-            return call_user_func($bind);
+            return call_user_func_array($bind, $params);
 
         } elseif (is_object($bind)) {
             return $bind;
