@@ -10,19 +10,21 @@ use ReflectionParameter;
 
 class Container
 {
-    protected $binds;
+    protected $binds = [];
 
-    public function __construct()
+    public function __construct(array $binds = [])
     {
-        $this->binds = [];
+        foreach ($binds as $bind => $concrete) {
+            $this->bind($bind, $concrete);
+        }
     }
 
-    public function bind($interface, $concrete)
+    public function bind($bind, $concrete)
     {
-        $this->binds[$interface] = $concrete;
+        $this->binds[$bind] = $concrete;
     }
 
-    public function get($className, array $params = array())
+    public function get($className, array $params = [])
     {
         if ( ! $this->hasBind($className)) {
             return $this->resolveClass($className, $params);

@@ -178,4 +178,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $iterator->next();
         $this->assertEquals('second', $iterator->current());
     }
+
+    public function test_container_can_set_binds_via_constructor()
+    {
+        $container = new Container([
+            Iterator::class => ArrayIterator::class
+        ]);
+
+        $iterator = $container->get(Iterator::class);
+
+        $this->assertInstanceOf(ArrayIterator::class, $iterator);
+    }
 }
